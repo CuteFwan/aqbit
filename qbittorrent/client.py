@@ -31,6 +31,9 @@ class QBittorrentClient:
                 if r.status == 200:
                     """Everything is fine?"""
                     return data
+                elif r.status == 403:
+                    """Login has probably been invalidated. retry."""
+                    await self.login(self.credentials['username'], self.credentials['password'])
                 elif r.status == 400:
                     retries -= 1
                     print(f'Bad Http request, retrying {retries}')
@@ -63,7 +66,8 @@ class QBittorrentClient:
             'username' : username,
             'password' : password
             }
-        result = await self.request('POST', '/auth/login', payload=payload)
+        self.credentials = payload
+        result = await self.request('POST', '/auth/login', payload=self.credentials)
         if result == 'Ok.':
             self.authed.set()
         else:
