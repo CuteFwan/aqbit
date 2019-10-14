@@ -1,8 +1,10 @@
 from .errors import TorrentHashNotFound, TorrentNotValid, HttpException
+import aiohttp
+import asyncio
 
 class AConnector:
 
-    def __init__(self, *, base = None, session = None, loop = None):
+    def __init__(self, *, base, session = None, loop = None):
         self.base = base
         self.loop = loop or asyncio.get_event_loop()
         self.session = session
@@ -62,3 +64,32 @@ class AConnector:
         await self.session.close()
 
         return await self.request('POST', '/auth/logout')
+
+
+import requests
+
+class RConnector:
+
+    def __init__(self, *, base, session = None):
+        self.base = base
+        self.session = session or requests.Session()
+
+    def request(self, method, path : str, *, payload = None):
+        url = self.base + path
+        retries = 5
+
+        while retries:
+            r = self.session.request(method, url, data=payload)
+            if r.status_code == 200:
+                return r.text
+    def login(self, username : str, password : str):
+        if not self.session:
+            self.session = requests.Session()
+        payload = {
+            'username' : username,
+            'password' : password
+            }
+        self.credentials = payload
+        return self.request('POST', '/auth/login', payload=self.credentials)
+    def logout(self):
+        self.session.close()
