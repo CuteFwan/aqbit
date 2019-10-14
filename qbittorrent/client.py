@@ -9,9 +9,14 @@ class QBittorrentClient:
     QBittorent client
 
     """
-    def __init__(self, base, *, connector):
+    def __init__(self, *, connector):
         self.connector = connector
-        self.base = base
+
+    def login(self, username : str, password : str):
+        return self.connector.login(username, password)
+
+    def logout(self):
+        return self.connector.logout()
 
 
 
