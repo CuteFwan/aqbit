@@ -14,7 +14,6 @@ class QBittorrentClient:
 
         self.base = base
         self.session = None # Filled in login
-        self.authed = asyncio.Event()
 
 
 
@@ -68,14 +67,11 @@ class QBittorrentClient:
             }
         self.credentials = payload
         result = await self.request('POST', '/auth/login', payload=self.credentials)
-        if result == 'Ok.':
-            self.authed.set()
-        else:
+        if result != 'Ok.':
             raise FailedLogin(result)
 
     async def logout(self):
         """Attempt to log out of the webapi"""
-        await self.authed.wait()
 
         await self.request('POST', '/auth/logout')
         await self.session.close()
