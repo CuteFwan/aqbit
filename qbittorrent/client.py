@@ -9,72 +9,11 @@ class QBittorrentClient:
     QBittorent client
 
     """
-    def __init__(self, base, *, loop=None):
-        self.loop = asyncio.get_event_loop() if not loop else loop
-
+    def __init__(self, base, *, connector):
+        self.connector = connector
         self.base = base
-        self.session = None # Filled in login
 
 
-
-    async def request(self, method, path : str, *, payload = None):
-        url = self.base + path
-        retries = 5
-
-        while retries:
-            async with self.session.request(method, url, data=payload) as r:
-                data = await r.text(encoding='utf-8')
-                print(r.status, data)
-                if r.headers.get('Content-Type', None) == 'application/json':
-                    data = json.loads(data)
-                if r.status == 200:
-                    """Everything is fine?"""
-                    return data
-                elif r.status == 403:
-                    """Login has probably been invalidated. retry."""
-                    await self.login(self.credentials['username'], self.credentials['password'])
-                elif r.status == 400:
-                    retries -= 1
-                    print(f'Bad Http request, retrying {retries}')
-                    await asyncio.sleep(1)
-                elif r.status == 404:
-                    raise TorrentHashNotFound(r, data)
-                elif r.status == 415:
-                    raise TorrentNotValid(r, data)
-                else:
-                    return r.status, data
-        raise HttpException(r, data)
-
-                    
-
-
-    async def login(self, username : str, password : str):
-        """
-        Attempt to log into the web api using a username and password.
-
-        Parameters
-        ----------
-        username: str
-            The username to log into the web api
-        password: str
-            The password to log into the web api
-
-        """
-        self.session = aiohttp.ClientSession(cookie_jar=aiohttp.CookieJar(unsafe=True))
-        payload = {
-            'username' : username,
-            'password' : password
-            }
-        self.credentials = payload
-        result = await self.request('POST', '/auth/login', payload=self.credentials)
-        if result != 'Ok.':
-            raise FailedLogin(result)
-
-    async def logout(self):
-        """Attempt to log out of the webapi"""
-
-        await self.request('POST', '/auth/logout')
-        await self.session.close()
 
     def get_application_version(self):
         """
@@ -84,7 +23,7 @@ class QBittorrentClient:
         -------
         str
         """
-        return self.request('GET', '/app/version')
+        return self.connector.request('GET', '/app/version')
 
     def get_api_version(self):
         """
@@ -95,7 +34,7 @@ class QBittorrentClient:
         str
 
         """
-        return self.request('GET', '/app/webapiVersion')
+        return self.connector.request('GET', '/app/webapiVersion')
 
     def get_log(self, **kwargs):
         """
@@ -128,7 +67,7 @@ class QBittorrentClient:
 
         }
 
-        return self.request('GET', '/log/main', payload=payload)
+        return self.connector.request('GET', '/log/main', payload=payload)
 
     def get_torrents(self, **kwargs):
         """
@@ -217,7 +156,7 @@ class QBittorrentClient:
         if hashes:
             payload['hashes'] = '|'.join(hashes) if isinstance(hashes, list) else hashes
         print(payload)
-        return self.request('POST', '/torrents/info', payload=payload)
+        return self.connector.request('POST', '/torrents/info', payload=payload)
 
 
     def add_torrent(self, link : str, path : str):
@@ -235,7 +174,7 @@ class QBittorrentClient:
             'urls' : link,
             'savepath' : path
         }
-        return self.request('POST', '/torrents/add', payload=payload)
+        return self.connector.request('POST', '/torrents/add', payload=payload)
 
     def add_multi_torrents(self, links : list, path : str):
 
@@ -253,7 +192,7 @@ class QBittorrentClient:
             'urls' : '\n'.join(links),
             'savepath' : path
         }
-        return self.request('POST', '/torrents/add', payload=payload)
+        return self.connector.request('POST', '/torrents/add', payload=payload)
 
     def pause_torrent(self, hash : str):
         """
@@ -268,7 +207,7 @@ class QBittorrentClient:
             'hashes' : hash
         }
         print(payload)
-        return self.request('POST', '/torrents/pause', payload=payload)
+        return self.connector.request('POST', '/torrents/pause', payload=payload)
 
     def pause_multi_torrents(self, hashes : list):
         """
@@ -283,7 +222,7 @@ class QBittorrentClient:
             'hashes' : '|'.join(hashes)
         }
         print(payload)
-        return self.request('POST', '/torrents/pause', payload=payload)
+        return self.connector.request('POST', '/torrents/pause', payload=payload)
 
     def resume_torrent(self, hash : list):
         """
@@ -298,7 +237,7 @@ class QBittorrentClient:
             'hashes' : hash
         }
         print(payload)
-        return self.request('POST', '/torrents/resume', payload=payload)
+        return self.connector.request('POST', '/torrents/resume', payload=payload)
 
     def resume_multi_torrents(self, hashes : list):
         """
@@ -313,4 +252,4 @@ class QBittorrentClient:
             'hashes' : '|'.join(hashes)
         }
         print(payload)
-        return self.request('POST', '/torrents/resume', payload=payload)
+        return self.connector.request('POST', '/torrents/resume', payload=payload)
