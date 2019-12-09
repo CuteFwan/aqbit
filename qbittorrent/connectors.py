@@ -81,7 +81,10 @@ class RConnector:
         while retries:
             r = self.session.request(method, url, data=payload)
             if r.status_code == 200:
-                return r.text
+                data = r.text
+            if r.headers.get('Content-Type', None) == 'application/json':
+                return json.loads(data)
+            return data
     def login(self, username : str, password : str):
         if not self.session:
             self.session = requests.Session()

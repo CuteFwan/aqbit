@@ -160,7 +160,6 @@ class QBittorrentClient:
         hashes = kwargs.get('hashes')
         if hashes:
             payload['hashes'] = '|'.join(hashes) if isinstance(hashes, list) else hashes
-        print(payload)
         return self.connector.request('POST', '/torrents/info', payload=payload)
 
 
