@@ -1,6 +1,7 @@
 from .errors import TorrentHashNotFound, TorrentNotValid, HttpException
 import aiohttp
 import asyncio
+import json
 
 class AConnector:
 
