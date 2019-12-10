@@ -17,7 +17,6 @@ class AConnector:
         while retries:
             async with self.session.request(method, url, data=payload) as r:
                 data = await r.text(encoding='utf-8')
-                print(r.status, data)
                 if r.headers.get('Content-Type', None) == 'application/json':
                     data = json.loads(data)
                 if r.status == 200:

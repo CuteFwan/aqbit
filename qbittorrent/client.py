@@ -210,7 +210,6 @@ class QBittorrentClient:
         payload = {
             'hashes' : hash
         }
-        print(payload)
         return self.connector.request('POST', '/torrents/pause', payload=payload)
 
     def pause_multi_torrents(self, hashes : list):
@@ -225,7 +224,6 @@ class QBittorrentClient:
         payload = {
             'hashes' : '|'.join(hashes)
         }
-        print(payload)
         return self.connector.request('POST', '/torrents/pause', payload=payload)
 
     def resume_torrent(self, hash : list):
@@ -240,7 +238,6 @@ class QBittorrentClient:
         payload = {
             'hashes' : hash
         }
-        print(payload)
         return self.connector.request('POST', '/torrents/resume', payload=payload)
 
     def resume_multi_torrents(self, hashes : list):
@@ -255,5 +252,4 @@ class QBittorrentClient:
         payload = {
             'hashes' : '|'.join(hashes)
         }
-        print(payload)
         return self.connector.request('POST', '/torrents/resume', payload=payload)
