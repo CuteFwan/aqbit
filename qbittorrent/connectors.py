@@ -61,9 +61,9 @@ class AConnector:
     async def logout(self):
         """Attempt to log out of the webapi"""
 
-        await self.session.close()
-
         return await self.request('POST', '/auth/logout')
+
+        await self.session.close()
 
 
 import requests
