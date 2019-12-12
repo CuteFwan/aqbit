@@ -153,8 +153,7 @@ class QBittorrentClient:
             'sort' : None,
             'reverse' : None,
             'limit' : None,
-            'offset' : None,
-            'hashes' : None
+            'offset' : None
         }
         payload = { k : kwargs.get(k, v) for k, v in defaults.items() if v or kwargs.get(k)}
         hashes = kwargs.get('hashes')
@@ -163,91 +162,41 @@ class QBittorrentClient:
         return self.connector.request('POST', '/torrents/info', payload=payload)
 
 
-    def add_torrent(self, link : str, path : str):
+    def add_torrents(self, *links : str, **kwargs):
         """
-        Adds a single torrent.
-
-        Parameters
-        ----------
-        link: str
-            Can be a link to a torrent file or a magnet link.
-        path: str
-            The folder to download to.
+        Adds torrents
         """
-        payload = {
-            'urls' : link,
-            'savepath' : path
+        defaults = {
+            'torrents' : None,
+            'savepath' : None,
+            'cookie' : None,
+            'category' : None,
+            'skip_checking' : None,
+            'root_folder' : None,
+            'rename' : None,
+            'upLimit' : None,
+            'dlLimit' : None,
+            'autoTMM' : None,
+            'sequentialDownload' : None,
+            'firstLastPiecePrio' : None
         }
+        payload = { k : kwargs.get(k, v) for k, v in defaults.items() if v or kwargs.get(k)}
+        if len(links):
+            payload['urls'] = '\n'.join(links)
         return self.connector.request('POST', '/torrents/add', payload=payload)
 
-    def add_multi_torrents(self, links : list, path : str):
-
+    def pause_torrents(self, *hashes : str):
         """
-        Adds multiple torrents.
-
-        Parameters
-        ----------
-        links: list
-            A list of urls. Can be to torrent files or magnet links.
-        path: str
-            The folder to download to.
-        """
-        payload = {
-            'urls' : '\n'.join(links),
-            'savepath' : path
-        }
-        return self.connector.request('POST', '/torrents/add', payload=payload)
-
-    def pause_torrent(self, hash : str):
-        """
-        Pauses a single torrent.
-
-        Parameters
-        ----------
-        hash: str
-            The hash of the torrent to pause.
-        """
-        payload = {
-            'hashes' : hash
-        }
-        return self.connector.request('POST', '/torrents/pause', payload=payload)
-
-    def pause_multi_torrents(self, hashes : list):
-        """
-        Pauses multiple torrent.
-
-        Parameters
-        ----------
-        hashes: list
-            A list of hashes of the torrents to pause.
+        Pauses torrents.
         """
         payload = {
             'hashes' : '|'.join(hashes)
         }
         return self.connector.request('POST', '/torrents/pause', payload=payload)
 
-    def resume_torrent(self, hash : list):
+    def resume_torrent(self, hashes : list):
         """
         Resumes a single torrent.
-
-        Parameters
-        ----------
-        hash: str
-            The hash of the torrent to resume.
-        """
-        payload = {
-            'hashes' : hash
-        }
-        return self.connector.request('POST', '/torrents/resume', payload=payload)
-
-    def resume_multi_torrents(self, hashes : list):
-        """
-        Resumes multiple torrent.
-
-        Parameters
-        ----------
-        hashes: list
-            A list of hashes of the torrents to resume.
         """
         payload = {
             'hashes' : '|'.join(hashes)
