@@ -1,5 +1,3 @@
-import aiohttp
-import asyncio
 import json
 
 from .errors import TorrentNotValid, TorrentHashNotFound, FailedLogin, HttpException
