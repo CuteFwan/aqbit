@@ -159,8 +159,8 @@ class QBittorrentClient:
             payload['hashes'] = '|'.join(hashes) if isinstance(hashes, list) else hashes
         return self.connector.request('POST', '/torrents/info', payload=payload)
 
-    def get_torrent_info(self, hash : str):
-        payload = {'hash' : hash}
+    def get_torrent_info(self, torrent_hash : str):
+        payload = {'hash' : torrent_hash}
         return self.connector.request('POST', '/torrents/properties', payload=payload)
 
     def add_torrents(self, *links : str, **kwargs):
